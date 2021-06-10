@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -31,7 +30,7 @@ type Person struct {
 	FirstName string
 	LastName  string
 	Gender    string
-	Dob       time.Time
+	Dob       string
 }
 
 type HomePageVars struct {
@@ -66,7 +65,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		fn string
 		ln string
 		gn string
-		dt time.Time
+		dt string
 	)
 	//dt.Format("02-01-2006")
 	for rows.Next() {
@@ -94,27 +93,37 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func create(w http.ResponseWriter, r *http.Request) {
 	var onePerson Person
-	layout := "02-01-2006"
-	//var dt time.Time
-	r.ParseForm()
-	fname := r.FormValue("first-name")
-	lname := r.FormValue("last-name")
-	dob := r.FormValue("date-of-birth")
-	dt, err := time.Parse(layout, dob)
-	gender := r.FormValue("gender")
+	if r.Method == "POST" {
+		db := dbConn()
+		defer db.Close()
 
-	fmt.Println(fname)
-	onePerson = Person{
-		FirstName: fname,
-		LastName:  lname,
-		Gender:    gender,
-		Dob:       dt,
+		//layout := "2006-02-06"
+		//var dt time.Time
+		r.ParseForm()
+		fname := r.FormValue("first-name")
+		lname := r.FormValue("last-name")
+		dob := r.FormValue("date-of-birth")
+		fmt.Printf("value=%v type = %T of html date input", dob, dob)
+		//dt, err := time.Parse(layout, dob)
+		//checkError(err)
+		gender := r.FormValue("gender")
+
+		onePerson = Person{
+			FirstName: fname,
+			LastName:  lname,
+			Gender:    gender,
+			Dob:       dob,
+		}
+		var id int
+		insertRow := `INSERT INTO person(first_name, last_name, gender, date_of_birth) VALUES($1, $2,$3, TO_DATE($4,'YYYYMMDD')) RETURNING id`
+		err := db.QueryRow(insertRow, onePerson.FirstName, onePerson.LastName, onePerson.Gender, onePerson.Dob).Scan(&id)
+		checkError(err)
 	}
 
 	temp, err := template.ParseFiles("create.html")
 	checkError(err)
-
 	err = temp.Execute(w, onePerson)
+	checkError(err)
 }
 
 func main() {

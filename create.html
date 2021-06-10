@@ -2,8 +2,25 @@
 <html>
     <head>
         <title>Create a person</title>
+        <style>
+            div>p{
+                box-shadow: 2px 2px 2px 2px rgba(90, 86, 86, 0.2);
+                
+            }
+            button{
+                background-color: coral;
+                box-shadow:2 px 2px 2px 2px cornflowerblue;
+            }
+            a{
+                text-decoration: none;
+            }
+        </style>
     </head>
+
     <body>
+        <button>
+            <a href="/">Home</a>
+        </button>
         <form action="/create" method="POST" name="personInfo">
             <label for="first-name">First Name:</label>
             <input type="text" name="first-name"><br><br>
@@ -12,7 +29,7 @@
             <input type="text" name="last-name"><br><br>
 
             <label for="date-of-birth">Date Of Birth:</label>
-            <input type="date" name="date-of-birth" >
+            <input type="date" name="date-of-birth" ><br> <br>
 
             <label for="gender" >Gender</label>
             <input type="radio" name="gender" value="female">Female
