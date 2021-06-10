@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{.Title}}</title>
+        <style>
+            div>p{
+                box-shadow: 2px 2px 2px 2px rgba(90, 86, 86, 0.2);
+                
+            }
+        </style>
+    </head>
+    <body>
+        <h1>CRUD operation in action!!</h1>
+        <h3>Connect to database and try to show data from person table by querying</h3>
+
+        {{range .Persons}}
+            <div>
+                <p>{{.Id}}   {{.FirstName}}    {{.LastName}}  {{.Dob}}</p><br>
+            </div>
+            
+        {{end}}
+
+    </body>
+</html>

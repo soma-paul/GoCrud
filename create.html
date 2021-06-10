@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Create a person</title>
+    </head>
+    <body>
+        <form action="/create" method="POST" name="personInfo">
+            <label for="first-name">First Name:</label>
+            <input type="text" name="first-name"><br><br>
+
+            <label for="last-name">Last Name:</label>
+            <input type="text" name="last-name"><br><br>
+
+            <label for="date-of-birth">Date Of Birth:</label>
+            <input type="date" name="date-of-birth" >
+
+            <label for="gender" >Gender</label>
+            <input type="radio" name="gender" value="female">Female
+            <input type="radio" name="gender" value="male"> Male
+
+            
+            <button type="submit">Create User</button>
+
+            <p>{{.FirstName}}</p>
+        </form>
+    </body>
+</html>
