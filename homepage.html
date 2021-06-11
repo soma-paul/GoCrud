@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
         <title>{{.Title}}</title>
         <style>
             div>p{
@@ -16,6 +17,15 @@
             }
         </style>
     </head>
+
+    <script type='text/javascript'>
+        $(document).ready(function() {
+          $('button[name=delete]').click(function(){
+            $('form').submit();
+          });
+       });
+    </script>
+    
     <body>
         <h1>CRUD operation in action!!</h1>
         <h3>Connect to database and try to show data from person table by querying</h3>
@@ -24,7 +34,11 @@
         </button>
         {{range .Persons}}
             <div>
-                <p>{{.Id}}   {{.FirstName}}    {{.LastName}}  {{.Dob}}</p><br>
+                <p>{{.Id}}   {{.FirstName}}    {{.LastName}}  {{.Dob}}</p>
+                <form action="/" method="POST">
+                    <button type="submit" name="delete" value={{.Id}}>DELETE</button> <br>
+                </form>
+                
             </div>
             
         {{end}}

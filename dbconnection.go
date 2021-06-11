@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/lib/pq"
 )
@@ -72,10 +73,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		rows.Scan(&id, &fn, &ln, &gn, &dt)
 		persons = append(persons, Person{id, fn, ln, gn, dt})
-		//fmt.Printf("length=%v capacity=%v\n", len(persons), cap(persons))
 
 	}
-	//fmt.Printf("%v %T length=%v capacity=%v\n", persons, persons, len(persons), cap(persons))
 
 	checkError(err)
 
@@ -83,6 +82,25 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		Title:   "CRUD",
 		Persons: persons,
 	}
+
+	var tobeDeleteID string
+
+	//delete an entry
+	if r.Method == "POST" {
+		//r.ParseForm()
+		tobeDeleteID = r.FormValue("delete")
+
+	}
+	fmt.Println("to be deleted entr's id: ", tobeDeleteID)
+	var deleteId int
+	deleteId, err = strconv.Atoi(tobeDeleteID)
+	stmnt := `DELETE FROM person WHERE id=$1`
+	res, err := db.Exec(stmnt, deleteId)
+	checkError(err)
+
+	affect, err := res.RowsAffected()
+	fmt.Println(affect, "rows changed")
+	//deletion of one entry is complete
 
 	temp, err := template.ParseFiles("homepage.html")
 	checkError(err)
