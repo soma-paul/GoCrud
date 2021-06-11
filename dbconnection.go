@@ -49,63 +49,50 @@ func dbConn() (db *sql.DB) { //return a batabase with necessary info
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	var persons []Person
-	db := dbConn()
+	persons = getAll()
 
-	defer db.Close()
-
-	/*//inserting a row
-	insertRow := fmt.Sprintf("INSERT INTO %s(first_name, last_name, gender, date_of_birth) VALUES('arpon', 'anaytul', 'male', date'1998-07-19')", TABLE_NAME)
-	db.QueryRow(insertRow) */
-
-	//QUERY to get data
-	rows, err := db.Query("SELECT * FROM person ORDER BY id DESC")
-	checkError(err)
-
-	var (
-		id int
-		fn string
-		ln string
-		gn string
-		dt string
-	)
-	//dt.Format("02-01-2006")
-	for rows.Next() {
-
-		rows.Scan(&id, &fn, &ln, &gn, &dt)
-		persons = append(persons, Person{id, fn, ln, gn, dt})
-
-	}
-
-	checkError(err)
-
+	//insert data to send it to corresponding html file as an object
 	myPageVars := HomePageVars{
 		Title:   "CRUD",
 		Persons: persons,
 	}
 
-	var tobeDeleteID string
+	//\\for DELETE operation, 1 entry
+	//parsing id of delete button on click through form submission
 
-	//delete an entry
 	if r.Method == "POST" {
-		//r.ParseForm()
-		tobeDeleteID = r.FormValue("delete")
+
+		tobeDeleteID := r.FormValue("delete")
+		idTobeUpdated := r.FormValue("update")
+		if tobeDeleteID != "" {
+			deleteId, err := strconv.Atoi(tobeDeleteID)
+			checkError(err)
+			fmt.Printf("to be deleted entry's id: %v %T", deleteId, deleteId)
+			fmt.Println(delete(deleteId))
+		} else {
+			idUpdate, err := strconv.Atoi(idTobeUpdated)
+			checkError(err)
+			fmt.Printf("to be updated entry's id: %v %T", idUpdate, idUpdate)
+		}
 
 	}
-	fmt.Println("to be deleted entr's id: ", tobeDeleteID)
-	var deleteId int
-	deleteId, err = strconv.Atoi(tobeDeleteID)
-	stmnt := `DELETE FROM person WHERE id=$1`
-	res, err := db.Exec(stmnt, deleteId)
-	checkError(err)
-
-	affect, err := res.RowsAffected()
-	fmt.Println(affect, "rows changed")
-	//deletion of one entry is complete
 
 	temp, err := template.ParseFiles("homepage.html")
 	checkError(err)
 	err = temp.Execute(w, myPageVars)
 	checkError(err)
+
+	/*
+
+
+		affect, err := res.RowsAffected()
+		fmt.Println(affect, "rows changed")
+		//deletion of one entry is complete
+	*/
+
+	/*//\\UPDATE one entry
+
+	 */
 
 }
 
@@ -144,6 +131,61 @@ func create(w http.ResponseWriter, r *http.Request) {
 	checkError(err)
 }
 
+func insert(p Person) int {
+	var id int
+
+	return id //last inserted row's Id
+}
+
+func delete(id int) int64 {
+	var effectedRows int64
+	db := dbConn()
+	defer db.Close()
+	stmnt := `DELETE FROM person WHERE id=$1`
+	res, err := db.Exec(stmnt, id)
+	checkError(err)
+	effectedRows, err = res.RowsAffected()
+	return effectedRows
+}
+
+func update(id int, p Person) int64 { // takes an id and Person and update that rows
+	var effectedRows int64
+	db := dbConn()
+	defer db.Close()
+	stmnt := `UPDATE person SET first_name=$2, last_name=$3, gender=$4, date_of_birth=TO_DATE($5) WHERE id=$1`
+	res, err := db.Exec(stmnt, id, p.FirstName, p.LastName, p.Gender, p.Dob)
+	checkError(err)
+	effectedRows, err = res.RowsAffected()
+	checkError(err)
+	return effectedRows
+}
+
+//get all the persons
+func getAll() []Person {
+	var persons []Person
+	//db connection
+	db := dbConn()
+	defer db.Close()
+
+	//QUERY to get data
+	rows, err := db.Query("SELECT * FROM person ORDER BY id DESC")
+	checkError(err)
+
+	//get data from db and store it in struct Person
+	var (
+		id int
+		fn string
+		ln string
+		gn string
+		dt string
+	)
+	//dt.Format("02-01-2006")
+	for rows.Next() {
+		rows.Scan(&id, &fn, &ln, &gn, &dt)
+		persons = append(persons, Person{id, fn, ln, gn, dt})
+	}
+	return persons
+}
 func main() {
 
 	http.HandleFunc("/", Index)
